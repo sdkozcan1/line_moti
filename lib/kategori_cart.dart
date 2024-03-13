@@ -29,48 +29,46 @@ class _CategoriesState extends State<Categories> {
 
     return MaterialApp(
       home: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color.fromARGB(255, 246, 242, 242),
+          leading: IconButton(
+            onPressed: () {
+              setState(() {
+                Navigator.push(
+                  context,
+                  PageTransition(
+                    type: PageTransitionType.rightToLeft,
+                    child: MainPage(),
+                  ),
+                );
+              });
+            },
+            icon: Icon(
+              Icons.close,
+              color: Colors.black,
+            ),
+          ),
+          title: Text(
+            "KATEGORİLER",
+            style: GoogleFonts.aboreto(
+                color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25),
+          ),
+          elevation: 0,
+        ),
         body: Container(
           color: Color.fromARGB(255, 246, 242, 242),
           width: screenSize.width,
           height: screenSize.height,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.rightToLeft,
-                        child: MainPage(),
-                      ),
-                    );
-                  });
-                },
-                icon: Icon(Icons.close),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  width: 100,
-                  height: 25,
-                  child: Text(
-                    "Kategoriler",
-                    style: GoogleFonts.aboreto(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12),
-                  ),
-                ),
-              ),
+              /* Kart */
               FutureBuilder(
                   future: futureData,
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Container(
-                        height: 600,
+                        height: 700,
                         width: screenSize.width,
                         child: ListView.builder(
                           itemCount: snapshot.data!.kategori.length,
@@ -161,6 +159,8 @@ class _CategoriesState extends State<Categories> {
                       child: CircularProgressIndicator(),
                     );
                   }),
+              /* -------------- */
+              /* Kaydet butonu */
               InkWell(
                 onTap: () {},
                 child: Container(
