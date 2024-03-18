@@ -2,32 +2,30 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:mor_motivasyon/favoritPage.dart';
 import 'package:mor_motivasyon/kategoriModel.dart';
 import 'package:mor_motivasyon/kategori_cart.dart';
 import 'package:mor_motivasyon/splashScreen.dart';
 import 'package:page_transition/page_transition.dart';
 
-const textAndkategoriBox = 'textAndkategori_box';
-var textAndkategoriMap = [
-  {"id": "1", "kategori": "ktg1", "text": "text1"},
-  {"id": "2", "kategori": "ktg2", "text": "text2"},
-  {"id": "3", "kategori": "ktg3", "text": "text3"},
+const textFavoriBox = 'Boxfavori';
+var textList = [
+  {"id": 1, "kategori": "ktg1", "text": "text1"},
+  {"id": 2, "kategori": "ktg2", "text": "text2"},
+  {"id": 3, "kategori": "ktg3", "text": "text3"},
 ];
 void main() async {
-  /* Hive  id,kategori ,text leri veri tabanına aldık ve bu init etmek ve box açmak için gerkeli kod ve verileri göndermek için */
-  WidgetsFlutterBinding.ensureInitialized();
+  /* Hive  init ve openBox */
   await Hive.initFlutter();
-  await Hive.openBox(textAndkategoriBox);
-  var favoriBox = Hive.box(textAndkategoriBox);
-  await favoriBox.putAll(textAndkategoriMap
-      .asMap()
-      .map((key, value) => MapEntry(key.toString(), value)));
+  await Hive.openBox(textFavoriBox);
+
   /* -------------------------------- */
   runApp(MaterialApp(
     initialRoute: '/splash',
     routes: {
       '/splash': (context) => SplashScreen(),
       '/home': (context) => MainPage(),
+      '/favori': (context) => FavoritePage(),
 
       // Add other routes for your app screens here
     },
@@ -43,13 +41,11 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   late Future<MyData> futureData;
-  late Box textKategoriBox;
 
   @override
   void initState() {
     super.initState();
     /* Boxı çağırdık ve uygulama için veri kazanımı yavaşlatmıyor */
-    textKategoriBox = Hive.box(textAndkategoriBox);
 
     futureData = loadMyData();
   }
@@ -68,28 +64,45 @@ class _MainPageState extends State<MainPage> {
     'Pacifico'
   ];
 /* Anasayfadaki texti değiştirme fonksiyonu bu fonksiyon mainpage 3 icon da olan async icon butonu tıklandığında gerçekleşecek */
-  var index = 0;
+  var currentIndex = 0;
   changeText() {
-    if (index < textAndkategoriMap.length - 1) {
-      ++index;
-      print("index artıyor ${index}");
+    if (currentIndex < textList.length - 1) {
+      currentIndex++;
     } else {
-      index = 0;
-      print("index 1 ${index}");
+      currentIndex = 0;
     }
   }
+
   /* ----------------------------- */
+  /* Favori Iconı Tıklaıdğımızda Gerçekleşecek olan olayların Fonksiyonu (Hive veri ekleme silme) */
+  Widget getIcon(int index) {
+    var box = Hive.box(textFavoriBox);
+    if (box.containsKey(currentIndex)) {
+      return Icon(Icons.favorite, color: Colors.red);
+    }
+    return Icon(Icons.favorite_border);
+  }
+
+  void onFavoritePress(int index) {
+    var box = Hive.box(textFavoriBox);
+
+    if (box.containsKey(currentIndex)) {
+      box.delete(currentIndex);
+      print("delete:${currentIndex}: \n ${textList[currentIndex]}");
+
+      return;
+    }
+    box.put(index, textList[currentIndex]);
+    print("put :${currentIndex}: \n ${textList[currentIndex]}");
+  }
+/* ----------------------------------------------------------------- */
 
   @override
   Widget build(BuildContext context) {
     /* Cihazın Sizenı Almak İçin olan Kod */
     final screenSize = MediaQuery.of(context).size;
     /* ------------------ */
-/* hive için kodlar */
-    var textAndkategoriMapItem = textKategoriBox.values.firstWhere(
-        (element) => element['id'] == (index + 1).toString(),
-        orElse: () => null);
-    /* -------------- */
+
     return MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -128,7 +141,7 @@ class _MainPageState extends State<MainPage> {
                           ],
                         ),
                         /* Main page motivasyon Textt */
-                        mainPageMotivasyonTextAndTarih(textAndkategoriMapItem),
+                        mainPageMotivasyonTextAndTarih(),
                         /* MAIN PAGE 3 ICON */
                         threeIcon()
                       ],
@@ -145,7 +158,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Center mainPageMotivasyonTextAndTarih(textAndkategoriMapItem) {
+  Center mainPageMotivasyonTextAndTarih() {
     return Center(
       child: RichText(
         textAlign: TextAlign.center,
@@ -158,7 +171,7 @@ class _MainPageState extends State<MainPage> {
               text: '\n MAR 2024',
             ),
             TextSpan(
-              text: "\n   ${textAndkategoriMapItem["text"]} ",
+              text: "\n    ${textList[currentIndex]["text"]}",
             ),
           ],
         ),
@@ -185,18 +198,29 @@ class _MainPageState extends State<MainPage> {
           child: Row(
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    PageTransition(
+                      type: PageTransitionType.rightToLeft,
+                      child: FavoritePage(),
+                    ),
+                  );
+                },
                 icon: Icon(
                   Icons.open_in_new,
                   color: Colors.white,
                 ),
               ),
               IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.favorite_border,
-                    color: Colors.white,
-                  ))
+                onPressed: () {
+                  setState(() {
+                    onFavoritePress(currentIndex);
+                  });
+                },
+                icon: getIcon(currentIndex),
+                color: Colors.white,
+              )
             ],
           ),
         )
