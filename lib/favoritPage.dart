@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:mor_motivasyon/main.dart';
+import 'package:page_transition/page_transition.dart';
 
 var box = Hive.box("Boxfavori");
 

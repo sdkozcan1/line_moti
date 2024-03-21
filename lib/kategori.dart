@@ -1,4 +1,4 @@
-// To parse this JSON data, do
+/* // To parse this JSON data, do
 //
 //     final kategoriModel = kategoriModelFromJson(jsonString);
 
@@ -32,3 +32,4 @@ class KategoriModel {
         "aciklama": aciklama,
       };
 }
+ */

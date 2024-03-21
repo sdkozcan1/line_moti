@@ -1,7 +1,9 @@
 import 'dart:ui';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:lottie/lottie.dart';
 import 'package:mor_motivasyon/favoritPage.dart';
 import 'package:mor_motivasyon/kategoriModel.dart';
 import 'package:mor_motivasyon/kategori_cart.dart';
@@ -11,8 +13,10 @@ import 'package:page_transition/page_transition.dart';
 const textFavoriBox = 'Boxfavori';
 var textList = [
   {"id": 1, "kategori": "ktg1", "text": "text1"},
-  {"id": 2, "kategori": "ktg2", "text": "text2"},
-  {"id": 3, "kategori": "ktg3", "text": "text3"},
+  {"id": 3, "kategori": "ktg2", "text": "text2"},
+  {"id": 4, "kategori": "ktg2", "text": "text3"},
+  {"id": 5, "kategori": "ktg2", "text": "text4"},
+  {"id": 6, "kategori": "ktg3", "text": "text5"},
 ];
 void main() async {
   /* Hive  init ve openBox */
@@ -26,6 +30,7 @@ void main() async {
       '/splash': (context) => SplashScreen(),
       '/home': (context) => MainPage(),
       '/favori': (context) => FavoritePage(),
+      '/category': (context) => Categories(),
 
       // Add other routes for your app screens here
     },
@@ -39,18 +44,15 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
-  late Future<MyData> futureData;
+class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
+  /*   -------------------------------------  TANIMLAMALARR değerler -------------------------------------  */
+  var currentIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    /* Boxı çağırdık ve uygulama için veri kazanımı yavaşlatmıyor */
+  String themaName = "tema";
+  String selectedCategory = '';
 
-    futureData = loadMyData();
-  }
+  bool animate = true;
 
-  String kategoriName = "tema";
   var fontName = [
     'ABeeZee',
     'Acme',
@@ -63,21 +65,80 @@ class _MainPageState extends State<MainPage> {
     'Arvo',
     'Pacifico'
   ];
-/* Anasayfadaki texti değiştirme fonksiyonu bu fonksiyon mainpage 3 icon da olan async icon butonu tıklandığında gerçekleşecek */
-  var currentIndex = 0;
-  changeText() {
-    if (currentIndex < textList.length - 1) {
-      currentIndex++;
-    } else {
-      currentIndex = 0;
-    }
+
+  late Future<MyData> futureData;
+  /* Animasyon controller */
+  late final AnimationController _animationController;
+  late AnimationController controller;
+
+  /* --------------------------     ------------------------------------------------ */
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(vsync: this);
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          print("Animasyon bittiiiiiiii iiiiiiiiii iiiiiiiiiiiiiii iiiii");
+          changeText();
+          controller.reverse();
+
+          _animationController
+            ..duration = Duration(seconds: 5)
+            ..reverse();
+        });
+      }
+    });
+    futureData = loadMyData();
   }
 
-  /* ----------------------------- */
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+/*  ------------------------------------- FONKSİYONLAR ------------------------------------- */
+
+  /*  ------------------------- animasyonu oynatmamızı sağlayan fonksiyon------------------- */
+  _handlePlayAnimationReverse() {
+    // animasyon bitmiş mi diye kontrol ediyoruz
+
+    // eğer bitmişse ve tekrardan butona basmışsak animasyonu tersten oynatıyoruz
+    _animationController
+      ..duration = Duration(seconds: 3)
+      ..reverse();
+    print("reverse");
+  }
+
+  _handlePlayAnimationForward() {
+    // eğer bitmemişse ve butona basmışsak animasyonu ileri doğru oynatıyoruz
+    _animationController
+      ..duration = Duration(seconds: 3)
+      ..forward();
+    print("forward");
+  }
+
+  /* ----------------------------- ------------------------------------- ------------------------------------- */
+
+/* Anasayfadaki texti değiştirme fonksiyonu bu fonksiyon mainpage 3 icon da olan async icon butonu tıklandığında gerçekleşecek */
+  changeText() {
+    animate = !animate;
+    setState(() {
+      if (currentIndex < textList.length - 1) {
+        currentIndex++;
+      } else {
+        currentIndex = 1;
+      }
+    });
+  }
+
+  /* -----------------------------  ------------------------------------- -------------------------------------*/
+
   /* Favori Iconı Tıklaıdğımızda Gerçekleşecek olan olayların Fonksiyonu (Hive veri ekleme silme) */
   Widget getIcon(int index) {
     var box = Hive.box(textFavoriBox);
-    if (box.containsKey(currentIndex)) {
+    if (box.containsKey(index)) {
       return Icon(Icons.favorite, color: Colors.red);
     }
     return Icon(Icons.favorite_border);
@@ -95,7 +156,7 @@ class _MainPageState extends State<MainPage> {
     box.put(index, textList[currentIndex]);
     print("put :${currentIndex}: \n ${textList[currentIndex]}");
   }
-/* ----------------------------------------------------------------- */
+/* ------------------------------------- ------------------------------------- ------------------------------------- ------------------------------------- ----------------------------------------------------------------- */
 
   @override
   Widget build(BuildContext context) {
@@ -142,6 +203,25 @@ class _MainPageState extends State<MainPage> {
                         ),
                         /* Main page motivasyon Textt */
                         mainPageMotivasyonTextAndTarih(),
+                        /* MOTİVASYON TEXT DEĞİŞTİRME ANİMASYON  */
+                        Container(
+                          width: 300,
+                          height: 300,
+                          child: GestureDetector(
+                            onLongPressUp: () {
+                              _handlePlayAnimationReverse();
+                              controller.reverse();
+                            },
+                            onLongPress: () {
+                              _handlePlayAnimationForward();
+                              controller.forward();
+                            },
+                            child: Lottie.asset(
+                              "assets/img/olumlama.json",
+                              controller: _animationController,
+                            ),
+                          ),
+                        ),
                         /* MAIN PAGE 3 ICON */
                         threeIcon()
                       ],
@@ -160,20 +240,24 @@ class _MainPageState extends State<MainPage> {
 
   Center mainPageMotivasyonTextAndTarih() {
     return Center(
-      child: RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          text: '05 ',
-          style: GoogleFonts.aboreto(
-              fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20),
-          children: <TextSpan>[
-            TextSpan(
-              text: '\n MAR 2024',
-            ),
-            TextSpan(
-              text: "\n    ${textList[currentIndex]["text"]}",
-            ),
-          ],
+      child: FadeOut(
+        manualTrigger: true,
+        duration: Duration(seconds: 1),
+        animate: animate,
+        controller: (animationCtrl) => controller = animationCtrl,
+        child: RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            text: '05 ',
+            style: GoogleFonts.aboreto(
+                fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20),
+            children: <TextSpan>[
+              TextSpan(
+                text: '\n MAR 2024',
+              ),
+              TextSpan(text: "\n ${textList[currentIndex]["text"]}"),
+            ],
+          ),
         ),
       ),
     );
@@ -198,14 +282,20 @@ class _MainPageState extends State<MainPage> {
           child: Row(
             children: [
               IconButton(
-                onPressed: () {
-                  Navigator.push(
+                onPressed: () async {
+                  print("test");
+                  await Navigator.push(
                     context,
                     PageTransition(
                       type: PageTransitionType.rightToLeft,
                       child: FavoritePage(),
                     ),
                   );
+                  setState(() {
+                    getIcon(currentIndex);
+                  });
+                  print("deneme");
+                  /* getIcon(currentIndex); */
                 },
                 icon: Icon(
                   Icons.open_in_new,
@@ -273,15 +363,22 @@ class _MainPageState extends State<MainPage> {
           ),
           /* Menu icon tıklandığında kategori sayfasını açarsın */
           IconButton(
-              onPressed: () {
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  PageTransition(
+                    type: PageTransitionType.rightToLeft,
+                    child: Categories(),
+                  ),
+                );
+                if (result != null) {
+                  setState(() {
+                    selectedCategory = result;
+                  });
+                }
                 setState(() {
-                  Navigator.push(
-                    context,
-                    PageTransition(
-                      type: PageTransitionType.rightToLeft,
-                      child: Categories(),
-                    ),
-                  );
+                  result;
+                  print("deneme ${result}");
                 });
               },
               icon: ImageIcon(
@@ -341,10 +438,10 @@ class _MainPageState extends State<MainPage> {
                       ),
                       onPressed: () {
                         debugPrint("TEMALAR");
-                        kategoriName == "";
+                        themaName == "";
 
                         setState(() {
-                          kategoriName = "tema";
+                          themaName = "tema";
                         });
                       },
                       child: const Text(
@@ -357,10 +454,10 @@ class _MainPageState extends State<MainPage> {
                         textStyle: const TextStyle(fontSize: 20),
                       ),
                       onPressed: () {
-                        kategoriName == "";
+                        themaName == "";
 
                         setState(() {
-                          kategoriName = "canli";
+                          themaName = "canli";
                         });
                         debugPrint("Canlı");
                       },
@@ -374,10 +471,10 @@ class _MainPageState extends State<MainPage> {
                         textStyle: const TextStyle(fontSize: 20),
                       ),
                       onPressed: () {
-                        kategoriName == "";
+                        themaName == "";
                         debugPrint("SESLER");
                         setState(() {
-                          kategoriName = "sesler";
+                          themaName = "sesler";
                         });
                       },
                       child: const Text(
@@ -390,10 +487,10 @@ class _MainPageState extends State<MainPage> {
                         textStyle: const TextStyle(fontSize: 20),
                       ),
                       onPressed: () {
-                        kategoriName == "";
+                        themaName == "";
 
                         setState(() {
-                          kategoriName = "font";
+                          themaName = "font";
                         });
                       },
                       child: const Text(
@@ -414,21 +511,20 @@ class _MainPageState extends State<MainPage> {
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         /* Item Count temaname göre item count length*/
-                        itemCount: kategoriName == "tema"
+                        itemCount: themaName == "tema"
                             ? snapshot.data!.tema.length
-                            : kategoriName == "canli"
+                            : themaName == "canli"
                                 ? snapshot.data!.canli.length
-                                : kategoriName == "sesler"
+                                : themaName == "sesler"
                                     ? snapshot.data!.sesler.length
-                                    : kategoriName == "font"
+                                    : themaName == "font"
                                         ? fontName.length
                                         : 0, // Burada 0 olarak setlenmiştir, değişebilir.
                         /* -------------- ---------------- */
 
                         itemBuilder: (context, index) {
                           /* tema naemi tema veya canlıysa gelen seçenekler */
-                          if (kategoriName == "tema" ||
-                              kategoriName == "canli") {
+                          if (themaName == "tema" || themaName == "canli") {
                             MyTheme tema = snapshot.data!.tema[index];
                             MyTheme canli = snapshot.data!.canli[index];
                             return Padding(
@@ -440,7 +536,7 @@ class _MainPageState extends State<MainPage> {
                                     decoration: BoxDecoration(
                                       image: DecorationImage(
                                         image: AssetImage(
-                                          kategoriName == "tema"
+                                          themaName == "tema"
                                               ? tema.imgUrl
                                               : canli.imgUrl,
                                         ),
@@ -453,7 +549,7 @@ class _MainPageState extends State<MainPage> {
                                     left: 25,
                                     child: Center(
                                       child: Text(
-                                        kategoriName == "tema"
+                                        themaName == "tema"
                                             ? tema.photoAciklama
                                             : canli.photoAciklama,
                                         style: TextStyle(
@@ -466,7 +562,7 @@ class _MainPageState extends State<MainPage> {
                               ),
                             );
                             /* ----------------------------- */
-                          } else if (kategoriName == "sesler") {
+                          } else if (themaName == "sesler") {
                             MyTheme sesler = snapshot.data!.sesler[index];
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -492,7 +588,7 @@ class _MainPageState extends State<MainPage> {
                                 )
                               ],
                             );
-                          } else if (kategoriName == "font") {
+                          } else if (themaName == "font") {
                             return Center(
                               child: Container(
                                 width: 120,

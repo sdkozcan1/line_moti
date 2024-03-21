@@ -3,9 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mor_motivasyon/kategoriModel.dart';
-import 'package:mor_motivasyon/main.dart';
-
-import 'package:page_transition/page_transition.dart';
 
 class Categories extends StatefulWidget {
   const Categories({super.key});
@@ -23,6 +20,7 @@ class _CategoriesState extends State<Categories> {
     futureData = loadMyData();
   }
 
+  String kategoriNameCart = "";
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -34,13 +32,7 @@ class _CategoriesState extends State<Categories> {
           leading: IconButton(
             onPressed: () {
               setState(() {
-                Navigator.push(
-                  context,
-                  PageTransition(
-                    type: PageTransitionType.rightToLeft,
-                    child: MainPage(),
-                  ),
-                );
+                Navigator.pop(context, "ktg2");
               });
             },
             icon: Icon(
@@ -85,63 +77,71 @@ class _CategoriesState extends State<Categories> {
                                 width: 100,
                                 child: Column(
                                   children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          width: 120,
-                                          height: 125,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(10),
-                                                bottomLeft:
-                                                    Radius.circular(10)),
-                                            image: DecorationImage(
-                                              image: AssetImage(
-                                                  '${kategori.imgUrl}'),
-                                              fit: BoxFit.cover,
+                                    InkWell(
+                                      onTap: () {
+                                        print("kategori tıklandı");
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            width: 120,
+                                            height: 125,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(10),
+                                                  bottomLeft:
+                                                      Radius.circular(10)),
+                                              image: DecorationImage(
+                                                image: AssetImage(
+                                                    '${kategori.imgUrl}'),
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(4.0),
-                                                  child: Container(
-                                                    child: Text(
-                                                      '${kategori.name}',
+                                          Expanded(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            4.0),
+                                                    child: Container(
+                                                      child: Text(
+                                                        '${kategori.name}',
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(4.0),
-                                                  child: Text(
-                                                    "${kategori.aciklama}",
-                                                  ),
-                                                )
-                                              ],
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            4.0),
+                                                    child: Text(
+                                                      "${kategori.aciklama}",
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child:
-                                              Icon(Icons.check_circle_rounded),
-                                        ),
-                                      ],
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Icon(
+                                                Icons.check_circle_rounded),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
